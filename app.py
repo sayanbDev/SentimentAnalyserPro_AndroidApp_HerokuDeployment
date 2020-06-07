@@ -64,7 +64,7 @@ def get_text_prediction():
         api = tweepy.API(auth)
         search=topic+' -filter:retweets'
         tweets = api.search(search, result_type="mixed", lang="en",tweet_mode="extended",count=no_of_tweets)
-        if len(tweets)==count:
+        if len(tweets)==no_of_tweets:
             data=[clean_tweet(tweet.full_text) for tweet in tweets]
             pos=[]
             neg=[]
@@ -90,7 +90,7 @@ def get_text_prediction():
                 else: 
                     neg_pol=neg_pol+analysis.sentiment.polarity
                     neg.append(tweets[i])
-                    neu_urls.append(f"https://twitter.com/user/status/{tweets[i].id}")
+                    neg_urls.append(f"https://twitter.com/user/status/{tweets[i].id}")
                 i+=1
             overall=''
             pos_per=int((len(pos)/no_of_tweets)*100)
