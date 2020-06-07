@@ -64,7 +64,7 @@ def get_text_prediction():
         api = tweepy.API(auth)
         search=topic+' -filter:retweets'
         tweets = api.search(search, result_type="mixed", lang="en",tweet_mode="extended",count=no_of_tweets)
-        if (len(tweets)==count:
+        if len(tweets)==count:
             data=[clean_tweet(tweet.full_text) for tweet in tweets]
             pos=[]
             neg=[]
