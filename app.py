@@ -51,7 +51,7 @@ def get_text_prediction():
     topic=json['topic']
     no_of_tweets=json['no']
     no_of_tweets=int(no_of_tweets)
-    if no_of_tweets<0 or no_of_tweets>200:
+    if no_of_tweets<0 or no_of_tweets>100:
         return jsonify({"test":1}) #limit error
     else:
         consumer_key = 'GujYFuaLVvmLYQH7tBbFM43ZX'
@@ -75,6 +75,14 @@ def get_text_prediction():
             pos_urls=[]
             neg_urls=[]
             neu_urls=[]
+            pos_likes=[]
+            neg_likes=[]
+            neu_likes=[]
+            pos_retweets=[]
+            neg_retweets=[]
+            neu_retweets=[]
+            
+            
             i=0
 
             for tweet in data:
@@ -96,52 +104,93 @@ def get_text_prediction():
             pos_per=int((len(pos)/no_of_tweets)*100)
             neg_per=int((len(neg)/no_of_tweets)*100)
             neu_per=int((len(neu)/no_of_tweets)*100)
+            c=max([pos_per,neg_per,neu_per])
+            if c==pos_per:
+                overall='POSITIVE'
+            elif c==neg_per:
+                overall='NEGATIVE'
+            else:
+                overall='NEUTRAL'
+            if pos_per==neg_per:
+                if pos_pol> (0-neg_pol):
+                    overall='POSITIVE'
+                    
+                else:
+                    overall='NEGATIVE'
+                
+            
             if (pos_per+neg_per+neu_per)!=100:
-                if pos_per==neu_per:
-                    overall='TIE between POS & NEU'
+                if pos_per==33 and neg_per==33 and neu_per==33:
+                    overall='TIE between POS, NEG & NEU'
+                    pos_per+=0.34
+                    neu_per+=0.33
+                    neg_per+=0.33
+                    
+                elif pos_per==neu_per:
                     pos_per+=0.5
                     neu_per+=0.5
+                    if c==pos_per:
+                        overall='TIE between POS & NEU'
+                        
                 elif neg_per==neu_per:
-                    overall='TIE between NEG & NEU'
+                    
                     neg_per+=0.5
                     neu_per+=0.5
-                else:
+                    if c==neg_per:
+                        overall='TIE between NEG & NEU'
+                elif pos_per==neg_per:
+                    
+            
                     if pos_pol> (0-neg_pol):
                         overall='POSITIVE'
+                        pos_per+=1
                     else:
                         overall='NEGATIVE'
-
-
-            else:
-                c=max([pos_per,neg_per,neu_per])
-                if c==pos_per:
-                    overall='POSITIVE'
-                elif c==neg_per:
-                    overall='NEGATIVE'
+                        neg_per+=1
                 else:
-                    overall='NEUTRAL'
+                    if overall=='POSITIVE':
+                        pos_per+=1
+                    elif overall=='NEGATIVE':
+                        neg_per+=1
+                    else:
+                        neu_per+=1
+                        
+                
             
 
             return jsonify({"test":0,
                             "no_of_tweets":no_of_tweets,
                             "overall":overall,
                             "search":topic,
-                            "pos":len(pos),
-                            "neg":len(neg),
-                            "neu":len(neu),
-                            "pos%":pos_per,
-                            "neg%":neg_per,
-                            "neu%":neu_per,
-                            "urls":{"pos":pos_urls,
-                                    "neg":neg_urls,
-                                    "neu":neu_urls
-                                    },
-                            "tweets":{"pos":[tweet.full_text for tweet in pos],
-                                      "neg":[tweet.full_text for tweet in neg],
-                                      "neu":[tweet.full_text for tweet in neu]
-                                      }})
+                            "pos_tweets":{"no of tweets":len(pos),
+                                          "percentage":str(pos_per),
+                                          "urls":pos_urls,
+                                          "tweets":[tweet.full_text for tweet in pos],
+                                          "likes":pos_likes,
+                                          "retweets":pos_retweets,
+                                          "polarity":pos_pol
+                                          },
+                            "neg_tweets":{"no of tweets":len(neg),
+                                          "percentage":str(neg_per),
+                                          "urls":neg_urls,
+                                          "tweets":[tweet.full_text for tweet in neg],
+                                          "likes":neg_likes,
+                                          "retweets":neg_retweets,
+                                          "polarity":neg_pol
+                                          },
+                            "neu_tweets":{"no of tweets":len(neu),
+                                          "percentage":str(neu_per),
+                                          "urls":neu_urls,
+                                          "tweets":[tweet.full_text for tweet in neu],
+                                          "likes":neu_likes,
+                                          "retweets":neu_retweets
+                                          }})
+            
         else:
-            return jsonify({"test":2}) #topic error
+            return jsonify({"test":2,
+                            "search topic":topic,
+                            "search operator":search,
+                            "number of tweets":len(tweets)}) #topic error
             
     
     
